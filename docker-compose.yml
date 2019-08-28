@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  api:
+    container_name: gos-framework-test
+    build: .
+    ports:
+      - "3000:8082"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DB_DIALECT=postgres
+      - DB_HOST=db
+      - DB_USER=gos-test
+      - DB_PASSWORD=gos-test-123
+      - DB_NAME=GOS_TEST_DB
+    command: ["./scripts/wait-for-it.sh", "db:5432", "--", "nodemon", "node_modules/.bin/mocha" ,"test/index.js"]
+    depends_on:
+      - db
+    links:
+      - db
+
+  db:
+    container_name: gos-framework-test-db
+    image: "postgres:9.3"
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=gos-test-123
+      - POSTGRES_USER=gos-test
+      - POSTGRES_DB=GOS_TEST_DB
